@@ -1,12 +1,16 @@
 from LazorBoard import LazorBoard
 
-def test_dark_1():
+def test(filename):
     '''
-    Loads and prints the board information from dark_1.bff for testing purposes.
+    Loads and prints the board information from a given .bff file.
+
+    *filename: str*
+        The name of the .bff file (without extension) located in bff_files/.
     '''
-    board = LazorBoard.from_file('bff_files/dark_1.bff')
+    board = LazorBoard.from_file(f'bff_files/{filename}.bff')
     print('--- Lazor Board Info ---')
     print(board)
 
 if __name__ == '__main__':
-    test_dark_1()
+    test('dark_1')
+

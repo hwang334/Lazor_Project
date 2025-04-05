@@ -72,12 +72,25 @@ class LazorBoard:
 
     def __str__(self):
         '''
-        Returns a readable string summary of the board.
+        Returns a nicely formatted string representation of the Lazor board.
         '''
-        summary = ['Grid:']
-        for row in self.grid:
-            summary.append(' '.join(row))
-        summary.append(f"Blocks: {self.blocks}")
-        summary.append(f"Lasers: {self.lasers}")
-        summary.append(f"Targets: {self.targets}")
-        return '\n'.join(summary)
+        # Format grid into readable string
+        grid_str = '\n'.join([' '.join(row) for row in self.grid])
+
+        # Format blocks
+        blocks_str = ', '.join([f'{k}: {v}' for k, v in self.blocks.items()])
+
+        # Format lasers
+        lasers_str = '\n'.join([f'  - ({x}, {y}) direction ({vx}, {vy})' for x, y, vx, vy in self.lasers])
+
+        # Format targets
+        targets_str = '\n'.join([f'  - ({x}, {y})' for x, y in self.targets])
+
+        # Combine everything
+        return (
+            f'=== Lazor Board ===\n'
+            f'Grid:\n{grid_str}\n\n'
+            f'Blocks: {blocks_str}\n\n'
+            f'Lasers:\n{lasers_str}\n\n'
+            f'Targets:\n{targets_str}\n'
+        )
