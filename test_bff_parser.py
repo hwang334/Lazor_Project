@@ -12,5 +12,5 @@ def test(filename):
     print(board)
 
 if __name__ == '__main__':
-    test('dark_1')
+    test('mad_1')
 

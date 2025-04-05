@@ -67,26 +67,18 @@ class LazorBoard:
                     parts = line.split()
                     x, y = map(int, parts[1:])
                     targets.append((x, y))
-
+        print(f"Blocks after reading file: {blocks}") 
         return cls(grid, blocks, lasers, targets)
 
     def __str__(self):
         '''
         Returns a nicely formatted string representation of the Lazor board.
         '''
-        # Format grid into readable string
         grid_str = '\n'.join([' '.join(row) for row in self.grid])
-
-        # Format blocks
         blocks_str = ', '.join([f'{k}: {v}' for k, v in self.blocks.items()])
-
-        # Format lasers
         lasers_str = '\n'.join([f'  - ({x}, {y}) direction ({vx}, {vy})' for x, y, vx, vy in self.lasers])
-
-        # Format targets
         targets_str = '\n'.join([f'  - ({x}, {y})' for x, y in self.targets])
 
-        # Combine everything
         return (
             f'=== Lazor Board ===\n'
             f'Grid:\n{grid_str}\n\n'
@@ -94,3 +86,93 @@ class LazorBoard:
             f'Lasers:\n{lasers_str}\n\n'
             f'Targets:\n{targets_str}\n'
         )
+
+    def get_empty_slots(self):
+        ''' Returns a list of empty slots (positions with 'o') on the grid. '''
+        empty_slots = []
+        for y in range(len(self.grid)):
+            for x in range(len(self.grid[y])):
+                if self.grid[y][x] == 'o':
+                    empty_slots.append((x, y))
+        return empty_slots
+
+    def out_of_bounds(self, pos):
+        ''' Returns True if the position is outside the grid boundaries. '''
+        x, y = pos
+        return not (0 <= x < len(self.grid[0]) and 0 <= y < len(self.grid))
+
+    def is_valid_position(self, x, y):
+        '''
+        Checks if a given coordinate is a valid position for placing a block.
+        
+        x: *int*
+            The x-coordinate on the board.
+        y: *int*
+            The y-coordinate on the board.
+        '''
+        return 0 <= x < len(self.grid[0]) and 0 <= y < len(self.grid) and self.grid[y][x] == 'o'
+
+    def place_block(self, x, y, block_type):
+        '''
+        Places a block of a given type on the board.
+        
+        x: *int*
+            The x-coordinate where the block will be placed.
+        y: *int*
+            The y-coordinate where the block will be placed.
+        block_type: *str*
+            The type of block ('A', 'B', or 'C') to place.
+        '''
+        print(f"Attempting to place block {block_type} at ({x}, {y})")
+        print(f"Current blocks: {self.blocks}")
+        
+        if self.is_valid_position(x, y) and self.blocks[block_type] > 0:
+            self.grid[y][x] = block_type
+            self.blocks[block_type] -= 1
+            print(f"Placed block {block_type} at ({x}, {y})")
+            return True
+        print(f"Failed to place block {block_type} at ({x}, {y})")
+        return False
+
+    def get_block_at(self, x, y):
+        '''
+        Returns the block at the given position (x, y) on the grid.
+        
+        x: *int*
+            The x-coordinate of the position.
+        y: *int*
+            The y-coordinate of the position.
+        
+        Returns:
+            str: The type of block at the position, or 'o' if no block is present.
+        '''
+        if 0 <= x < len(self.grid[0]) and 0 <= y < len(self.grid):
+            return self.grid[y][x]  # Return the type of block or 'o' if empty
+        return 'o'
+
+    def simulate_lasers(self):
+        '''
+        Simulates all lasers and checks if they hit the targets.
+        
+        Returns:
+            bool: True if all targets are hit, False otherwise.
+        '''
+        for laser in self.lasers:
+            x, y, vx, vy = laser
+            while 0 <= x < len(self.grid[0]) and 0 <= y < len(self.grid):
+                block = self.get_block_at(x, y)  # Get block at current position
+                if block == 'x':
+                    break  # Hit a wall, stop
+                if (x, y) in self.targets:
+                    self.targets.remove((x, y))
+                    break
+                if block in ['A', 'B', 'C']:
+                    # Reflect, refract, or block the laser based on block type
+                    if block == 'A':
+                        vx, vy = -vx, -vy  # Reflect
+                    elif block == 'B':
+                        vx, vy = vy, vx  # Refract
+                    # 'C' block type might just block the laser path (no direction change)
+                x += vx
+                y += vy
+        return len(self.targets) == 0

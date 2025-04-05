@@ -32,5 +32,90 @@ To run the solver, execute `version_final.py` and enter the board file name. If 
 
 If the given board file is missing, the program will immediately print an error message without attempting to solve the puzzle.
 
+# Overview of the three code files
+
+Sure! Below are the `README` sections for the three files, formatted to explain the purpose, classes, functions, and features of each file.
+
+---
+
+### 1. **LazorBoard.py**
+
+**Purpose**:  
+This file contains the `LazorBoard` class, which handles the board layout, the placement of blocks, and simulates laser movements based on the configuration read from `.bff` files. It also checks whether lasers hit the targets and handles the grid setup for the game.
+
+**Classes**:
+- **LazorBoard**: Manages the board layout and contains methods for placing blocks, checking valid positions, and simulating laser movements.
+
+**Functions**:
+- **`__init__(self, grid, blocks, lasers, targets)`**: Initializes the LazorBoard with a grid, available blocks, lasers, and targets.
+- **`from_file(cls, filename)`**: Class method that reads a `.bff` file, parses it, and initializes a LazorBoard instance.
+- **`__str__(self)`**: Returns a string representation of the board layout, blocks, lasers, and targets.
+- **`get_empty_slots(self)`**: Returns a list of coordinates where blocks can be placed (positions marked with 'o' in the grid).
+- **`out_of_bounds(self, pos)`**: Checks if a position is outside the grid.
+- **`is_valid_position(self, x, y)`**: Checks if a given position is valid for placing a block.
+- **`place_block(self, x, y, block_type)`**: Places a block of the specified type on the board at the given position.
+- **`get_block_at(self, x, y)`**: Returns the block type at a given position or 'o' if there is no block.
+- **`simulate_lasers(self)`**: Simulates all lasers and checks if they hit the targets.
+
+---
+
+### 2. **Classes.py**
+
+**Purpose**:  
+This file defines the core blocks (`A_Block`, `B_Block`, `C_Block`) and the `Laser` class. The blocks interact with lasers in different ways: reflecting, refracting, or blocking them. The laser class represents the lasers' position and movement.
+
+**Classes**:
+- **Laser**: Represents a laser with its position and direction on the board.
+- **A_Block**: Reflects the laser in the opposite direction.
+- **B_Block**: Refracts the laser by swapping its x and y directions.
+- **C_Block**: Blocks the laser and stops its movement.
+
+**Functions**:
+- **`Laser(x, y, vx, vy)`**: Initializes the laser with its position `(x, y)` and velocity `(vx, vy)`.
+- **`A_Block(laser)`**: Reflects the laser by changing its velocity direction.
+- **`B_Block(laser)`**: Refracts the laser by swapping its velocity components (`vx`, `vy`).
+- **`C_Block(laser)`**: Blocks the laser, stopping its movement.
+
+---
+
+### 3. **Solver.py**
+
+**Purpose**:  
+This file contains the logic to solve the Lazor puzzle by placing blocks on the board. It tries different permutations of the available blocks and simulates laser movements to check if all targets are hit.
+
+**Functions**:
+- **`simulate_lasers(board)`**: Simulates the lasers on the given board and returns the set of hit target points.
+- **`solve_lazor(board)`**: Attempts to solve the puzzle by trying all possible block placements and checking if all targets are hit.
+- **`save_solution_to_txt(solution, filename)`**: Saves the solved board configuration to a `.txt` file.
+
+**Helper Functions**:
+- **`backtrack(board, empty_slots, block_list, idx)`**: A recursive helper function used by `solve_lazor` to place blocks on the board and backtrack if a solution is not found.
+- **`get_empty_slots(board)`**: Returns the list of empty slots available for placing blocks on the board.
+
+---
+
+### **How to Run the Code**
+
+1. **Prepare the `.bff` file**:  
+   The `.bff` file should define the grid, blocks, lasers, and targets. It should be formatted as follows:
+   - `GRID START` and `GRID STOP` to define the grid.
+   - `B` followed by a number to specify how many blocks of type `B` are available.
+   - `L` to define the lasers' positions and directions.
+   - `P` to specify the target positions.
+
+2. **Run the main file**:  
+   In the terminal, run `main.py` to start the program. It will ask for the board name (e.g., `dark_1`), read the corresponding `.bff` file, and attempt to solve the puzzle. If a solution is found, it will output the result to a `.txt` file.
+
+   Example:
+   ```bash
+   python main.py
+   ```
+
+   You will be prompted to enter the board name (e.g., `dark_1`).
+
+3. **Solution File**:  
+   If the puzzle is solved successfully, the program will output the solved board configuration to a `.txt` file named `<board_name>_solution.txt`.
+
+
 # example:
 
