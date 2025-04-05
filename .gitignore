@@ -1,0 +1,25 @@
+# Ignore Python bytecode cache
+__pycache__/
+*.py[cod]
+
+# Ignore editor temporary or backup files
+*.swp
+*.swo
+*~
+
+# Ignore VSCode and JetBrains project settings
+.vscode/
+.idea/
+
+# Ignore system files (macOS/Windows)
+.DS_Store
+Thumbs.db
+
+# Ignore generated solution files or logs
+*.txt
+output/
+solution/
+
+# Ignore virtual environments
+venv/
+env/

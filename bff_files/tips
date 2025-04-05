@@ -1,0 +1,8 @@
+1. read the board (bff format)
+open the bff
+loop lines by line thru the file 
+save
+generate the board
+A reflect--code
+B opaque--code
+C refract--code--split two lazers keep original one, and generate a reflect
