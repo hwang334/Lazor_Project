@@ -34,10 +34,6 @@ If the given board file is missing, the program will immediately print an error 
 
 # Overview of the three code files
 
-Sure! Below are the `README` sections for the three files, formatted to explain the purpose, classes, functions, and features of each file.
-
----
-
 ### 1. **LazorBoard.py**
 
 **Purpose**:  
