@@ -1,16 +1,18 @@
 class Laser:
     '''
     Simulates the behavior of a laser on the board, tracking its movement and interactions.
-    
-    x: *int*
-        Initial x-coordinate of the laser.
-    y: *int*
-        Initial y-coordinate of the laser.
-    vx: *int*
-        Velocity in the x direction.
-    vy: *int*
-        Velocity in the y direction.
+
+    **Parameters**
+        x: *int*
+            Initial x-coordinate of the laser.
+        y: *int*
+            Initial y-coordinate of the laser.
+        vx: *int*
+            Velocity in the x direction.
+        vy: *int*
+            Velocity in the y direction.
     '''
+
     def __init__(self, x, y, vx, vy):
         self.x = x
         self.y = y
@@ -27,8 +29,8 @@ class Laser:
     def get_position(self):
         '''
         Returns the current position of the laser.
-        
-        Returns:
+
+        **Returns**
             tuple[int, int]: Current (x, y) coordinates of the laser.
         '''
         return self.x, self.y
@@ -42,7 +44,7 @@ class A_Block:
         '''
         Initialize a ReflectBlock object with its position.
 
-        *Parameters*
+        **Parameters**
             position: *tuple*
                 A tuple (x, y) representing the block's position on the grid.
         '''
@@ -53,11 +55,11 @@ class A_Block:
         '''
         Reflects the laser based on its impact on the block.
 
-        *Parameters*
+        **Parameters**
             laser: *Laser*
                 An object representing the laser with position and velocity.
 
-        *Returns*
+        **Returns**
             Laser: The laser object with updated position and velocity after reflection.
         '''
         relative_position = (laser.x - self.position[0],
@@ -79,11 +81,11 @@ class A_Block:
         '''
         Allows the object to be called like a function to reflect a laser.
 
-        *Parameters*
+        **Parameters**
             laser: *Laser*
                 The laser object to be reflected.
 
-        *Returns*
+        **Returns**
             Laser: The updated laser object.
         '''
         return self.reflect(laser)
@@ -97,7 +99,7 @@ class B_Block:
         '''
         Initialize an OpaqueBlock object with its position.
 
-        *Parameters*
+        **Parameters**
             position: *tuple*
                 A tuple (x, y) representing the block's position on the grid.
         '''
@@ -108,11 +110,11 @@ class B_Block:
         '''
         Stops the laser completely upon contact.
 
-        *Parameters*
+        **Parameters**
             laser: *Laser*
                 An object representing the laser with position and velocity.
 
-        *Returns*
+        **Returns**
             Laser: The laser object with updated position and stopped state.
         '''
         laser.is_block = True
@@ -122,11 +124,11 @@ class B_Block:
         '''
         Allows the object to be called like a function to block a laser.
 
-        *Parameters*
+        **Parameters**
             laser: *Laser*
                 The laser object to be blocked.
 
-        *Returns*
+        **Returns**
             Laser: The updated laser object.
         '''
         return self.opaque(laser)
@@ -140,49 +142,60 @@ class C_Block:
         '''
         Initialize a RefractBlock object with its position.
 
-        *Parameters*
+        **Parameters**
             position: *tuple*
                 A tuple (x, y) representing the block's position on the grid.
         '''
-        self.x, self.y = position
+        if isinstance(position, tuple) or isinstance(position, list):
+            self.x, self.y = position
+        else:
+            self.x, self.y = position[0], position[1]
+        self.position = (self.x, self.y)
         self.type = 'C'  # Add type attribute
 
     def refract(self, laser):
         '''
         Refracts the laser based on its impact on the block.
 
-        *Parameters*
+        **Parameters**
             laser: *Laser*
                 An object representing the laser with position and velocity.
 
-        *Returns*
-            laser: *Laser*
-                The original laser object.
-            new_laser: *Laser*
-                The laser object with updated position and velocity after refraction.
+        **Returns**
+            tuple: containing (new_laser, original_laser)
+                new_laser: The refracted laser
+                original_laser: The original laser with updated position
         '''
-        laser_vx = laser.vx
-        laser_vy = laser.vy
-        if (self.x - 1, self.y) == (laser.x, laser.y) or \
-                (self.x + 1, self.y) == (laser.x, laser.y):
-            laser_vx = -laser.vx
-        if (self.x, self.y - 1) == (laser.x, laser.y) or \
-                (self.x, self.y + 1) == (laser.x, laser.y):
-            laser_vy = -laser.vy
-        new_laser = Laser((laser.x, laser.y), (laser_vx, laser_vy))
-        laser()
+        # Create a new laser for refraction (starts at the same position)
+        new_laser = Laser(laser.x, laser.y, laser.vx, laser.vy)
+        
+        # Determine the approach direction and adjust velocities accordingly
+        # Horizontal approach
+        if (self.x - 1, self.y) == (laser.x, laser.y) or (self.x + 1, self.y) == (laser.x, laser.y):
+            # Reflected laser changes horizontal direction
+            new_laser.vx = -laser.vx
+            # Original laser continues with unchanged direction
+        # Vertical approach
+        elif (self.x, self.y - 1) == (laser.x, laser.y) or (self.x, self.y + 1) == (laser.x, laser.y):
+            # Reflected laser changes vertical direction
+            new_laser.vy = -laser.vy
+            # Original laser continues with unchanged direction
+            
+        # Move both lasers forward once
+        new_laser.move()
+        laser.move()
+        
         return new_laser, laser
 
     def __call__(self, laser):
         '''
         Allows the object to be called like a function to refract a laser.
 
-        *Parameters*
+        **Parameters**
             laser: *Laser*
                 The laser object to be refracted.
 
-        *Returns*
-            laser: *Laser*
-                The updated laser object.
+        **Returns**
+            tuple: containing (new_laser, original_laser)
         '''
         return self.refract(laser)

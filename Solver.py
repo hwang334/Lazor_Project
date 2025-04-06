@@ -1,116 +1,222 @@
-from LazorBoard import LazorBoard
+from itertools import permutations
+from copy import deepcopy
 from Blocks import A_Block, B_Block, C_Block, Laser
-import copy
+from LazorBoard import LazorBoard
+from collections import Counter
 
-def simulate_lasers(board):
+class Solver:
     '''
-    Simulates the lasers on the board and returns the set of hit target points.
+    A class that encapsulates the Lazor puzzle solver logic.
 
-    *board: LazorBoard*
-        The board instance with lasers and targets.
-
-    *return: set*
-        Set of (x, y) target points hit by any laser.
+    board : *LazorBoard*
+        The board instance to solve.
     '''
-    hit_targets = set()
-    active_lasers = [Laser(x, y, vx, vy) for (x, y, vx, vy) in board.lasers]
+    def __init__(self, board):
+        '''
+        Initialize the Solver with a LazorBoard instance.
 
-    for laser in active_lasers:
-        steps = 0
-        while steps < 100:  # Limit to 100 steps to avoid infinite loops
-            laser.move()
-            pos = (laser.x, laser.y)
+        *board: LazorBoard*
+            The puzzle board to solve.
+        '''
+        self.board = board
+        # Get all possible positions for blocks (positions with 'o')
+        self.all_PosBlock = self._get_all_possible_positions()
+        # Initialize lasers from the board
+        self.lasers = [Laser(l.x, l.y, l.vx, l.vy) for l in self.board.lasers]
 
-            if pos in board.targets:
-                hit_targets.add(pos)
+    def _get_all_possible_positions(self):
+        '''
+        Get all possible positions where blocks can be placed (positions with 'o').
+        
+        **Returns**
+            *list*: List of positions where blocks can be placed.
+        '''
+        positions = []
+        for y in range(len(self.board.grid)):
+            for x in range(len(self.board.grid[y])):
+                if self.board.grid[y][x] == 'o':
+                    # Using (x, y) format for consistency
+                    positions.append((x, y))
+        return positions
 
-            if board.out_of_bounds(pos):  # Check if laser goes out of bounds
-                break
+    def insert(self, block_position, grid):
+        '''
+        Adds blocks to the grid based on the provided positions.
 
-            block = board.get_block_at(laser.x, laser.y)  # Get block at current position
-            if block is not None:
-                if isinstance(block, A_Block):  # Handle A_Block interaction
-                    laser = block(laser)
-                elif isinstance(block, B_Block):  # Handle B_Block interaction
-                    laser = block(laser)
-                    break  # Stop laser on B_Block
-                elif isinstance(block, C_Block):  # Handle C_Block interaction
-                    reflected, transmitted = block(laser)
-                    active_lasers.append(reflected)  # Add reflected laser
-                    laser = transmitted  # Continue with transmitted laser
-            steps += 1
+        **Parameters**
+            block_position: *list*
+                List of (block_type, position) tuples.
+            grid: *list*
+                The grid to which blocks are added.
 
-    return hit_targets
+        **Returns**
+            grid: *list*
+                The grid after adding the blocks.
+        '''
+        # Add the blocks to the grid
+        for block_type, position in block_position:
+            x, y = position
+            grid[y][x] = block_type
+        return grid
 
-def solve_lazor(board):
-    '''
-    Tries to place blocks on the board, simulates lasers, and checks if all targets are hit.
+    def position_available(self, laser):
+        '''
+        Checks if the next position of a laser is within the grid.
 
-    *board: LazorBoard*
-        A LazorBoard instance with available blocks and empty slots.
+        **Parameters**
+            laser: *Laser*
+                The laser to check.
 
-    *return: LazorBoard or None*
-        A solved LazorBoard if a solution exists, otherwise None.
-    '''
-    empty_slots = board.get_empty_slots()  # Get all empty slots on the board
-    block_list = [B_Block for _ in range(board.blocks.get('B', 0))] + \
-                 [A_Block for _ in range(board.blocks.get('A', 0))] + \
-                 [C_Block for _ in range(board.blocks.get('C', 0))]
+        **Returns**
+            *bool*
+        '''
+        next_x = laser.x + laser.vx
+        next_y = laser.y + laser.vy
+        return 0 <= next_x < len(self.board.grid[0]) and 0 <= next_y < len(self.board.grid)
 
-    # Try all combinations of blocks and place them on the board
-    return backtrack(board, empty_slots, block_list, 0)
+    def check_lasers(self, lasers, tmp_grid, targets):
+        '''
+        Checks the paths of lasers on the grid, considering block interactions.
 
-def backtrack(board, empty_slots, block_list, index):
-    if index == len(block_list):
-        # If all blocks have been placed, try to simulate the lasers and check if the targets are hit
-        if board.simulate_lasers():
-            return board
+        **Parameters**
+            lasers: *list*
+                List of lasers to check.
+            tmp_grid: *list*
+                The temporary grid to check lasers' paths.
+            targets: *list*
+                List of target points.
+
+        **Returns**
+            lasers: *list*
+                List of lasers after checking paths.
+            targets: *list*
+                List of targets points after checking paths.
+        '''
+        for laser in lasers[:]:  # Use a copy to allow appending to original list
+            # Add is_block attribute if not present
+            if not hasattr(laser, 'is_block'):
+                laser.is_block = False
+
+            while self.position_available(laser) and not laser.is_block:
+                # Move the laser
+                laser.move()
+                
+                # Check if the laser hit a target
+                if (laser.x, laser.y) in targets:
+                    targets.remove((laser.x, laser.y))
+
+                # Check if the laser hit a block
+                if 0 <= laser.x < len(tmp_grid[0]) and 0 <= laser.y < len(tmp_grid):
+                    block_type = tmp_grid[laser.y][laser.x]
+                    
+                    if block_type == 'A':
+                        block = A_Block((laser.x, laser.y))
+                        laser = block(laser)
+                    elif block_type == 'B':
+                        block = B_Block((laser.x, laser.y))
+                        laser = block(laser)
+                        break  # B blocks stop the laser
+                    elif block_type == 'C':
+                        block = C_Block((laser.x, laser.y))
+                        try:
+                            new_laser, laser = block(laser)
+                            lasers.append(new_laser)
+                        except Exception as e:
+                            # Fix any implementation issues in C_Block
+                            print(f"Error with C_Block: {e}")
+                            break
+                    elif block_type == 'x':
+                        # Hit a wall, stop the laser
+                        break
+
+        return lasers, targets
+
+    def unique_permutations(self, elements):
+        """
+        Generate all unique permutations of the input list in a sorted manner.
+        
+        Parameters:
+            elements: list
+                A list of elements to permute.
+                
+        Yields:
+            tuple: A unique permutation of the elements list.
+        """
+        elements.sort()
+        counter = Counter(elements)
+        
+        def permute(sequence):
+            if not sequence:
+                yield tuple()
+            else:
+                for element in counter:
+                    if counter[element] > 0:
+                        counter[element] -= 1
+                        for sub_permute in permute(sequence[1:]):
+                            yield (element,) + sub_permute
+                        counter[element] += 1
+                        
+        return permute(elements)
+
+    def solve(self):
+        '''
+        Attempts to solve the game by iterating through all possible block combinations and laser paths.
+
+        **Returns**
+            *LazorBoard*: A solved board if a solution is found, None otherwise.
+        '''
+        # Get all blocks we need to place
+        block_list = (
+            ['A'] * self.board.blocks['A'] +
+            ['B'] * self.board.blocks['B'] +
+            ['C'] * self.board.blocks['C']
+        )
+        
+        print(f"Block list: {block_list}")
+        print(f"All possible positions: {self.all_PosBlock}")
+        
+        # Fill remaining positions with 'o' (no block)
+        empty_slots = ['o'] * (len(self.all_PosBlock) - len(block_list))
+        
+        # Get all possible combinations of block positions
+        all_possible_combinations = self.unique_permutations(block_list + empty_slots)
+        
+        # Try each combination
+        for block_position in all_possible_combinations:
+            # Pair each block type with a position
+            block_position = list(zip(block_position, self.all_PosBlock))
+            
+            # Create a temporary grid with the blocks placed
+            tmp_grid = self.insert(block_position, deepcopy(self.board.grid))
+            
+            # Create temporary copies of lasers and targets
+            lasers = [Laser(l.x, l.y, l.vx, l.vy) for l in self.board.lasers]
+            targets = deepcopy(self.board.targets)
+            
+            # Check if this arrangement solves the puzzle
+            lasers, targets = self.check_lasers(lasers, tmp_grid, targets)
+            
+            # If all targets are hit, we've found a solution
+            if not targets:
+                # Create a new board with the solution
+                solved_board = deepcopy(self.board)
+                solved_board.grid = tmp_grid
+                return solved_board
+                
+        # No solution found
         return None
-
-    x, y = empty_slots[index]
-    block = block_list[index]
-
-    # Use the block type string (e.g., 'A', 'B', or 'C') instead of the block class
-    block_type = block.__name__[0]  # Get the first letter of the block class name ('A', 'B', 'C')
     
-    # Try placing the block at the current position
-    if board.place_block(x, y, block_type):
-        result = backtrack(board, empty_slots, block_list, index + 1)
-        if result:
-            return result
-
-        # If no solution is found, remove the block and try the next possibility
-        board.grid[y][x] = 'o'
-        board.blocks[block_type] += 1
-
-    return None
-
-
-def save_solution_to_txt(solution, filename):
-    '''
-    Save the solved grid with blocks to a .txt file.
-
-    * solution: list[list[str]] 
-        The grid with placed blocks (e.g. 'A', 'B', 'C').
-    * filename: str
-        Name of the output file, should end with .txt.
-    '''
-    with open(filename, 'w') as f:
-        for row in solution:
-            f.write('  '.join(row) + '\n')  # Save each row of the grid
-
-if __name__ == '__main__':
-    # Read the board from a .bff file
-    board = LazorBoard.from_file('bff_files/dark_1.bff')
-    solved = solve_lazor(board)  # Solve the puzzle
-
-    if solved:
-        print("Solution found:")
-        for row in solved.grid:
-            print(' '.join(row))  # Print the solved board
-
-        # Save the solved grid to a file
-        board_name = 'dark_1'  # You can dynamically extract the board name if needed
-        save_solution_to_txt(solved.grid, f'{board_name}_solution.txt')
-    else:
-        print("No solution found.")
+    def save_solution_to_txt(self, grid, filename):
+        '''
+        Saves the solution grid to a text file.
+        
+        **Parameters**
+            grid: *list*
+                The grid to save.
+            filename: *str*
+                The name of the file to save to.
+        '''
+        with open(filename, 'w') as f:
+            for row in grid:
+                f.write(' '.join(row) + '\n')
+        print(f"Solution saved to {filename}")

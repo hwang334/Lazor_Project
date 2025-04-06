@@ -4,6 +4,7 @@ from Blocks import A_Block, B_Block, C_Block, Laser
 from LazorBoard import LazorBoard
 from collections import Counter
 
+
 class Solver:
     '''
     A class that encapsulates the Lazor puzzle solver logic.

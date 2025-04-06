@@ -1,3 +1,5 @@
+from Blocks import A_Block, B_Block, C_Block, Laser
+
 class LazorBoard:
     '''
     Parses a .bff file to initialize the Lazor board setup.
@@ -8,15 +10,15 @@ class LazorBoard:
         The board layout with 'o' for valid positions and 'x' for invalid.
     blocks : *dict[str, int]*
         A dictionary with keys 'A', 'B', and 'C' representing block types and their available counts.
-    lasers : *list[tuple[int, int, int, int]]*
-        List of lasers defined as (x, y, vx, vy).
+    lasers : *list[Laser]*
+        List of Laser objects that represent lasers on the board.
     targets : *list[tuple[int, int]]*
         List of target coordinates that need to be hit.
     '''
     def __init__(self, grid, blocks, lasers, targets):
         self.grid = grid
         self.blocks = blocks
-        self.lasers = lasers
+        self.lasers = [Laser(x, y, vx, vy) for x, y, vx, vy in lasers]  # Use Laser class instances
         self.targets = targets
 
     @classmethod
@@ -123,15 +125,11 @@ class LazorBoard:
         block_type: *str*
             The type of block ('A', 'B', or 'C') to place.
         '''
-        print(f"Attempting to place block {block_type} at ({x}, {y})")
-        print(f"Current blocks: {self.blocks}")
         
         if self.is_valid_position(x, y) and self.blocks[block_type] > 0:
             self.grid[y][x] = block_type
             self.blocks[block_type] -= 1
-            print(f"Placed block {block_type} at ({x}, {y})")
             return True
-        print(f"Failed to place block {block_type} at ({x}, {y})")
         return False
 
     def get_block_at(self, x, y):
@@ -158,21 +156,47 @@ class LazorBoard:
             bool: True if all targets are hit, False otherwise.
         '''
         for laser in self.lasers:
-            x, y, vx, vy = laser
-            while 0 <= x < len(self.grid[0]) and 0 <= y < len(self.grid):
-                block = self.get_block_at(x, y)  # Get block at current position
+            while 0 <= laser.x < len(self.grid[0]) and 0 <= laser.y < len(self.grid):
+                block = self.get_block_at(laser.x, laser.y)  # Get block at current position
                 if block == 'x':
                     break  # Hit a wall, stop
-                if (x, y) in self.targets:
-                    self.targets.remove((x, y))
+                if (laser.x, laser.y) in self.targets:
+                    self.targets.remove((laser.x, laser.y))
                     break
                 if block in ['A', 'B', 'C']:
-                    # Reflect, refract, or block the laser based on block type
-                    if block == 'A':
-                        vx, vy = -vx, -vy  # Reflect
-                    elif block == 'B':
-                        vx, vy = vy, vx  # Refract
-                    # 'C' block type might just block the laser path (no direction change)
-                x += vx
-                y += vy
+                    block_obj = A_Block((laser.x, laser.y)) if block == 'A' else \
+                                B_Block((laser.x, laser.y)) if block == 'B' else \
+                                C_Block((laser.x, laser.y))
+                    laser = block_obj(laser)  # Use the block's __call__ method to interact with the laser
+                laser.move()  # Move the laser using the Laser class's move method
         return len(self.targets) == 0
+
+def __deepcopy__(self, memo):
+    '''Support deep copy'''
+    from copy import deepcopy
+    result = LazorBoard(
+        deepcopy(self.grid), 
+        deepcopy(self.blocks), 
+        [(l.x, l.y, l.vx, l.vy) for l in self.lasers], 
+        deepcopy(self.targets)
+    )
+    return result
+
+def print_solution(self, output_file=None):
+    '''
+    Print the solution and optionally save it to a file
+    
+    Parameters:
+        output_file (str, optional): Path to the output file
+    '''
+    output = []
+    for row in self.grid:
+        output.append(' '.join(row))
+    
+    solution_str = '\n'.join(output)
+    print(solution_str)
+    
+    if output_file:
+        with open(output_file, 'w') as f:
+            f.write(solution_str)
+        print(f'Solution saved to {output_file}')

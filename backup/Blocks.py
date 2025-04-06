@@ -2,6 +2,7 @@ class Laser:
     '''
     Simulates the behavior of a laser on the board, tracking its movement and interactions.
 
+    
     **Parameters**
         x: *int*
             Initial x-coordinate of the laser.
