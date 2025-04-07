@@ -5,6 +5,7 @@ from LazorBoard import LazorBoard
 from collections import Counter
 
 
+
 class Solver:
     '''
     A class that encapsulates the Lazor puzzle solver logic.

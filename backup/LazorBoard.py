@@ -1,6 +1,7 @@
 from Blocks import A_Block, B_Block, C_Block, Laser
 
 
+
 class LazorBoard:
     '''
     Parses a .bff file to initialize the Lazor board setup.

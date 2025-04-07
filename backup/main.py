@@ -3,6 +3,7 @@ from Solver import Solver
 import os
 
 
+
 if __name__ == '__main__':
     # Prompt the user to input the level name
     level_name = input("Enter the level name (e.g., dark_1): ")  # User inputs the level name
