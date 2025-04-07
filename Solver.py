@@ -220,3 +220,6 @@ class Solver:
             for row in grid:
                 f.write(' '.join(row) + '\n')
         print(f"Solution saved to {filename}")
+
+        update
+        
