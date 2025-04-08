@@ -555,6 +555,9 @@ import time
 
 def solve_all_bff_files(debug=False):
     bff_folder = os.path.join(os.path.dirname(__file__), "bff_files")
+    output_folder = os.path.join(os.path.dirname(__file__), "Solution Output")
+    os.makedirs(output_folder, exist_ok=True)
+
     bff_files = [f for f in os.listdir(bff_folder) if f.endswith(".bff")]
     
     print(f"[INFO] Found {len(bff_files)} .bff files in '{bff_folder}'")
@@ -581,7 +584,8 @@ def solve_all_bff_files(debug=False):
 
         if success:
             print(f"[RESULT] Solution found for {bff_file} in {elapsed_time:.3f} seconds.")
-            visualize_lazor_solution(board, solver.final_paths, f"{bff_name}_lazor_solution.png")
+            output_path = os.path.join(output_folder, f"{bff_name}_Lazors_Solution.png")
+            visualize_lazor_solution(board, solver.final_paths, output_path)
         else:
             print(f"[RESULT] No solution found for {bff_file}. (Took {elapsed_time:.3f} seconds)")
 
