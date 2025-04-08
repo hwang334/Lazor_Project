@@ -33,13 +33,16 @@ There are also three types of functional blocks that can be placed freely:
 - B_Block (Opaque Block): Blocks the laser completely.  
 - C_Block (Refract Block): Splits the laser into two paths—one passing through and the other reflecting.  
 
-The program begins by loading the level settings from a `.bff` file. It then constructs the grid and identifies where blocks can be placed. The `component.py` file defines the laser behavior and block types.  
+The program begins by loading the puzzle configuration from a `.bff` file using `LazorBoard.py`. This file defines the board layout (`'o'` = open cell, `'x'` = blocked), the number of available blocks (`A`, `B`, `C`), laser sources, and target points.
 
-To solve the puzzle, the program generates all possible block arrangements and simulates laser movement for each case. It verifies if the lasers successfully hit all targets.  
+Next, the board is initialized using `Classes.py`, and solving begins via the `Solver` class in `Solver.py`. The solver uses a backtracking algorithm to try different valid combinations of block placements. For each configuration, it simulates laser paths to check if all target points are hit.
 
-To run the solver, execute `version_final.py` and enter the board file name. If a solution is found, it will be saved as a `.txt` file, including the final board layout, placed blocks, and laser paths. If no solution exists, the screen will display "No answer".  
+The laser logic—including movement, collision detection, and reflection/splitting—is handled within `Solver.py` and relies on block definitions from `Classes.py`.
 
-If the given board file is missing, the program will immediately print an error message without attempting to solve the puzzle.
+If a solution is found, laser trajectories are saved and visualized using `LazorVisualizer.py`. The resulting image is stored in the `Solution Output/` directory with the filename `<puzzle_name>_solution.png`.
+
+If no solution exists for a puzzle, the program will report "No solution found." If the `.bff` file is missing or corrupted, an error will be printed immediately and the solver will not proceed.
+
 
 # Logic Behind the Code 
 ### 1. Initial Laser Path (No Block State)
