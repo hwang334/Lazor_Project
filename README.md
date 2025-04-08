@@ -10,6 +10,15 @@ Huakun Wang: hwang334@jh.edu
 Xiaoyu Wang: xwang442@jh.edu 
 Zhixin (Mac) Zhang: zzhan336@jh.edu
 
+# Project Structure
+`bff_files` — Contains all puzzle files in .bff format.
+
+`Main_Final.py` — Main script to run all .bff files and solve them.
+
+`Solution Output` — Output folder where solution visualizations (.png) will be saved.
+
+`Blocks.py`，`Classes.py`, `LazorBoard.py`, `Solver.py`, `LazorVisualizer.py` — Core logic files for parsing, solving, and visualization.
+
 # How is the solution generated?  
 
 The game starts with an empty board, which contains a grid where lasers, blocks, and targets are placed and interact. The grid is represented as a matrix with different symbols:  
@@ -170,17 +179,17 @@ This file contains the logic to solve the Lazor puzzle by placing blocks on the 
    - `P` to specify the target positions.
 
 2. **Run the main file**:  
-   In the terminal, run `main.py` to start the program. It will ask for the board name (e.g., `dark_1`), read the corresponding `.bff` file, and attempt to solve the puzzle. If a solution is found, it will output the result to a `.txt` file.
+   In the terminal, run `Main_Final.py` to start the program. It will solve all puzzles in the `bff_files` folder.
 
    Example:
    ```bash
-   python main.py
+   python Main_Final.py
    ```
 
-   You will be prompted to enter the board name (e.g., `dark_1`).
+   The code will be solve all puzzles in the `bff_files` folder.
 
 3. **Solution File**:  
-   If the puzzle is solved successfully, the program will output the solved board configuration to a `.txt` file named `<board_name>_solution.txt`.
+   If the puzzle is solved successfully, the program will output the solved `<filename>_solution.png` in the `Solution Output` folder..
 
 
 # example:
