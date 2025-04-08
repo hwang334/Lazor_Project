@@ -17,7 +17,7 @@ Zhixin (Mac) Zhang: zzhan336@jh.edu
 
 `Solution Output` — Output folder where solution visualizations (.png) will be saved.
 
-`Blocks.py`，`Classes.py`, `LazorBoard.py`, `Solver.py`, `LazorVisualizer.py` — Core logic files for parsing, solving, and visualization.
+`Classes.py`, `LazorBoard.py`, `Solver.py`, `LazorVisualizer.py` — Core logic files for parsing, solving, and visualization.
 
 # How is the solution generated?  
 
