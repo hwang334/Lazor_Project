@@ -195,5 +195,4 @@ This file contains the logic to solve the Lazor puzzle by placing blocks on the 
    If the puzzle is solved successfully, the program will output the solved `<filename>_solution.png` in the `Solution Output` folder..
 
 
-# example:
 
