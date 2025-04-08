@@ -10,6 +10,14 @@ Huakun Wang: hwang334@jh.edu
 Xiaoyu Wang: xwang442@jh.edu 
 Zhixin (Mac) Zhang: zzhan336@jh.edu
 
+# Work Distribution:
+
+**Huakun Wang** was fully responsible for the overall project architecture. They took on the key task of parsing `.bff` files and built the core class structures of the Lazor project, including board parsing, the definition and base logic of reflective, refractive, and absorptive blocks, as well as the generation and movement of lasers. He ensured the accurate loading and systematic organization of level data. Moreover, he established a unified and clear code framework that allowed different modules to work efficiently together, laying a solid foundation for the rest of the development.
+
+**Xiaoyu Wang** focused on the core logic of the Lazor game, specifically the simulation of laser paths and the implementation of propagation rules. He not only optimized the algorithms for reflection, refraction, and absorption across various block types but also enhanced the laser path tracing logic to improve solving efficiency. He was also responsible for implementing the Solver module, achieving an effective and comprehensive search for Lazor solutions.
+
+**Zhixin Zhang**  was in charge of the result presentation. He developed the visualization features to make the solutions more intuitive and user-friendly. He also implemented an automated testing module that recorded and analyzed the solving time for each solution, providing valuable data for performance evaluation. Finally, he integrated and packaged the project and successfully published it on GitHub with high quality.
+
 # Project Structure
 `bff_files` — Contains all puzzle files in .bff format.
 
