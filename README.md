@@ -32,6 +32,76 @@ To run the solver, execute `version_final.py` and enter the board file name. If 
 
 If the given board file is missing, the program will immediately print an error message without attempting to solve the puzzle.
 
+# Logic Behind the Code 
+### 1. Initial Laser Path (No Block State)
+
+Start from each laser's initial position and simulate laser movement in half-step units
+until it reaches or crosses the board boundary.
+
+During this process, track the cells the laser passes through by checking if
+the two consecutive laser points share edge points with a grid cell.
+
+These "laser-passed" cells form the initial candidate cell set.
+
+### 2. Place Blocks in Candidate Cells and Update Path
+
+Select a cell from the candidate set and place one of the available block types (A/B/C) into it.
+
+Once a block is placed, the laser path may change:
+- When a laser moves from (x, y) to (nx, ny), check for collisions with any placed block.
+- If a collision occurs, modify the laser according to the block type:
+  - A: Reflects the laser.
+  - B: Blocks the laser.
+  - C: Splits the laser—one beam reflects, one continues in the same direction.
+
+The collision point becomes the new starting point for the laser (or multiple starting points for C),
+and the simulation continues as if in a "no block" state.
+Record all new cells the laser passes through; these form the new candidate set.
+
+### 3. Recursion and Backtracking
+
+For each new candidate cell, recursively attempt to place the remaining blocks.
+Update laser paths and generate further candidate cells.
+
+If at any point all target points are hit by lasers, a solution has been found.
+
+If all placement combinations fail to hit all targets, backtrack:
+Remove the last placed block and try another block or another location.
+
+### 4. Edge Point Matching
+
+To detect grid traversal and collisions:
+- Maintain an edge point library for each grid cell: typically 4 midpoints of each edge.
+- Similarly, blocks have their own edge point definitions.
+
+During simulation:
+- To detect cell traversal: if both points p1 and p2 in the laser path lie on a cell's edges, mark that cell as traversed.
+- To detect collisions: if p1 and p2 lie on a block's edge, a collision occurs.
+  Determine which edge was hit based on p1 → p2 direction, then apply reflection/block/split accordingly.
+
+### 5. Post-Collision: Resume "No Block" Simulation
+
+After hitting a block, call its specific handler:
+- A: Reflect the beam, invert the appropriate directional component.
+- B: Terminate the beam.
+- C: Create two new beams—one reflected, one continuing.
+
+For reflected beams: restart simulation from the collision point.
+For transmitted beams (C): offset the origin slightly (by half-step) to prevent re-collision at the same point,
+then continue "no block" simulation.
+
+Each new segment may yield new candidate cells, which must be tracked and updated.
+
+### 6. Target Hit Detection
+
+If a laser at any point exactly matches the position of a target, mark that target as hit.
+
+Once all targets are hit, a solution has been achieved, and the recursion ends.
+
+Continue the loop: place block → simulate → gather new candidates → place again,
+until all targets are covered or all paths fail and require backtracking.
+
+
 # Overview of the three code files
 
 ### 1. **LazorBoard.py**
